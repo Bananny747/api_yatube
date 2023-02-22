@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
 from posts.models import Comment, Group, Post
 from rest_framework import viewsets
 
@@ -15,12 +16,12 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        serializer.save()
+        viewsets.ModelViewSet.perform_update(self, serializer)
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        instance.delete()
+        viewsets.ModelViewSet.perform_destroy(self, instance)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -37,7 +38,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return new_queryset
 
     def perform_create(self, serializer):
-        post = Post.objects.get(id=self.kwargs.get('post_id'))
+        post = get_object_or_404(Post, id=self.kwargs.get('post_id'))
         serializer.save(
             author=self.request.user,
             post=post)
@@ -45,10 +46,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        post = Post.objects.get(id=self.kwargs.get('post_id'))
+        post = get_object_or_404(Post, id=self.kwargs.get('post_id'))
         serializer.save(post=post)
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        instance.delete()
+        viewsets.ModelViewSet.perform_destroy(self, instance)
