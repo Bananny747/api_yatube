@@ -16,12 +16,12 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        viewsets.ModelViewSet.perform_update(self, serializer)
+        return super().perform_update(serializer)
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        viewsets.ModelViewSet.perform_destroy(self, instance)
+        return super().perform_destroy(instance)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -46,10 +46,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        post = get_object_or_404(Post, id=self.kwargs.get('post_id'))
-        serializer.save(post=post)
+        return super().perform_update(serializer)
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
             raise PermissionDenied('Чужое не трожь!')
-        viewsets.ModelViewSet.perform_destroy(self, instance)
+        return super().perform_destroy(instance)
